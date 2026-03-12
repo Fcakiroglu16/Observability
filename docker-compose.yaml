@@ -100,11 +100,8 @@ services:
     #   - "8123:8123"
     #   - "9181:9181"
     volumes:
-      - ./common/clickhouse/config.xml:/etc/clickhouse-server/config.xml
-      - ./common/clickhouse/users.xml:/etc/clickhouse-server/users.xml
-      - ./common/clickhouse/custom-function.xml:/etc/clickhouse-server/custom-function.xml
+      - ./common/clickhouse/etc:/etc/clickhouse-server
       - ./common/clickhouse/user_scripts:/var/lib/clickhouse/user_scripts/
-      - ./common/clickhouse/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml
       - clickhouse:/var/lib/clickhouse/
       # - ./common/clickhouse/storage.xml:/etc/clickhouse-server/config.d/storage.xml
   signoz:
