@@ -1,0 +1,4 @@
+ARG OTELCOL_TAG=v0.144.2
+FROM signoz/signoz-otel-collector:${OTELCOL_TAG}
+COPY otel-collector-config.yaml /etc/otel-collector-config.yaml
+COPY common/signoz/otel-collector-opamp-config.yaml /etc/manager-config.yaml

@@ -75,7 +75,7 @@ services:
         mv histogram-quantile /var/lib/clickhouse/user_scripts/histogramQuantile
     restart: on-failure
     volumes:
-      - ./common/clickhouse/user_scripts:/var/lib/clickhouse/user_scripts/
+      - clickhouse-user-scripts:/var/lib/clickhouse/user_scripts/
   zookeeper-1:
     <<: *zookeeper-defaults
     container_name: signoz-zookeeper-1
@@ -93,19 +93,17 @@ services:
       - ZOO_PROMETHEUS_METRICS_PORT_NUMBER=9141
   clickhouse:
     <<: *clickhouse-defaults
+    build:
+      context: .
+      dockerfile: Dockerfile.clickhouse
     container_name: signoz-clickhouse
     # ports:
     #   - "9000:9000"
     #   - "8123:8123"
     #   - "9181:9181"
     volumes:
-      - ./common/clickhouse/config.xml:/etc/clickhouse-server/config.xml
-      - ./common/clickhouse/users.xml:/etc/clickhouse-server/users.xml
-      - ./common/clickhouse/custom-function.xml:/etc/clickhouse-server/custom-function.xml
-      - ./common/clickhouse/user_scripts:/var/lib/clickhouse/user_scripts/
-      - ./common/clickhouse/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml
+      - clickhouse-user-scripts:/var/lib/clickhouse/user_scripts/
       - clickhouse:/var/lib/clickhouse/
-      # - ../common/clickhouse/storage.xml:/etc/clickhouse-server/config.d/storage.xml
   signoz:
     <<: *db-depend
     image: signoz/signoz:${VERSION:-v0.115.0}
@@ -131,7 +129,11 @@ services:
       retries: 3
   otel-collector:
     <<: *db-depend
-    image: signoz/signoz-otel-collector:${OTELCOL_TAG:-v0.144.2}
+    build:
+      context: .
+      dockerfile: Dockerfile.otel-collector
+      args:
+        OTELCOL_TAG: ${OTELCOL_TAG:-v0.144.2}
     container_name: signoz-otel-collector
     entrypoint:
       - /bin/sh
@@ -140,9 +142,6 @@ services:
       - |
         /signoz-otel-collector migrate sync check &&
         /signoz-otel-collector --config=/etc/otel-collector-config.yaml --manager-config=/etc/manager-config.yaml --copy-path=/var/tmp/collector-config.yaml
-    volumes:
-      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
-      - ./common/signoz/otel-collector-opamp-config.yaml:/etc/manager-config.yaml
     environment:
       - OTEL_RESOURCE_ATTRIBUTES=host.name=signoz-host,os.type=linux
       - LOW_CARDINAL_EXCEPTION_GROUPING=false
@@ -178,6 +177,8 @@ networks:
 volumes:
   clickhouse:
     name: signoz-clickhouse
+  clickhouse-user-scripts:
+    name: signoz-clickhouse-user-scripts
   sqlite:
     name: signoz-sqlite
   zookeeper-1:
