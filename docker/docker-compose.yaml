@@ -109,7 +109,7 @@ services:
     image: signoz/signoz:${VERSION:-v0.115.0}
     container_name: signoz
     ports:
-      - "8080:8080" # signoz port
+      - "8080" # signoz port
     volumes:
       - sqlite:/var/lib/signoz/
     environment:
@@ -151,8 +151,8 @@ services:
       - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
     ports:
       # - "1777:1777"     # pprof extension
-      - "4317:4317" # OTLP gRPC receiver
-      - "4318:4318" # OTLP HTTP receiver
+      - "4317" # OTLP gRPC receiver
+      - "4318" # OTLP HTTP receiver
   signoz-telemetrystore-migrator:
     <<: *db-depend
     image: signoz/signoz-otel-collector:${OTELCOL_TAG:-v0.144.2}
